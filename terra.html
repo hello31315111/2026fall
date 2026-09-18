@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TERRA — 시간 위의 문화 지도</title>
+  <style>
+    :root {
+      --bg-dark: #07121c;
+      --bg-card: #0e2030;
+      --bg-card-hover: #152b3f;
+      --bg-header: rgba(7, 18, 28, 0.88);
+      --border-color: rgba(123, 171, 188, 0.2);
+      --border-highlight: rgba(197, 238, 154, 0.5);
+      --text-main: #eef5f8;
+      --text-muted: #8ba2b2;
+      --text-dim: #5c7485;
+      --accent-green: #d1ffa8;
+      --accent-glow: rgba(197, 238, 154, 0.25);
+      --accent-cyan: #56c1e2;
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--bg-header);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      gap: 1rem;
+    }
+
+    .identity {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+
+    .brand {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+
+    .brand span {
+      color: var(--accent-green);
+    }
+
+    .tagline {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .tagline { display: inline-block; }
+    }
+
+    .search {
+      position: relative;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: rgba(14, 32, 48, 0.7);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search input:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: rgba(21, 43, 63, 0.9);
+    }
+
+    .search-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 120;
+    }
+
+    .search-results button {
+      width: 100%;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-main);
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-results button:hover {
+      background: var(--bg-card-hover);
+      color: var(--accent-green);
+    }
+
+    .search-results small {
+      color: var(--text-dim);
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-sm);
+      background: rgba(197, 238, 154, 0.1);
+      color: var(--accent-green);
+      border: 1px solid rgba(197, 238, 154, 0.25);
+      white-space: nowrap;
+    }
+
+    #runtimeStatus {
+      padding: 0.5rem 1.5rem;
+      font-size: 0.8rem;
+      background: rgba(15, 35, 56, 0.6);
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    #runtimeStatus.runtime-error {
+      background: rgba(180, 40, 40, 0.2);
+      color: #ff9999;
+      border-bottom: 1px solid rgba(255, 100, 100, 0.4);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr 420px;
+      }
+    }
+
+    .explorer {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      position: relative;
+    }
+
+    .intro .eyebrow {
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .intro h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .intro p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .globe-wrap {
+      position: relative;
+      width: 100%;
+      height: 480px;
+      background: radial-gradient(circle at center, #0e2638 0%, #06111a 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+    }
+
+    #staticGlobe {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #globe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    #globe:active {
+      cursor: grabbing;
+    }
+
+    .tools {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      z-index: 10;
+    }
+
+    .tools button {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(14, 32, 48, 0.85);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .tools button:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .legend {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(7, 18, 28, 0.75);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+
+    .legend .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      margin-right: 0.4rem;
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .globe-label {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.75rem;
+      font-family: monospace;
+      color: var(--text-dim);
+      background: rgba(7, 18, 28, 0.75);
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+
+    .timeline {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+    }
+
+    .timehead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .timehead strong {
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .timehead small {
+      font-size: 0.82rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .periods {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .periods button {
+      padding: 0.6rem 0.5rem;
+      border-radius: var(--radius-md);
+      background: rgba(7, 18, 28, 0.5);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .periods button:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .periods button.active {
+      background: rgba(197, 238, 154, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      box-shadow: 0 0 12px rgba(197, 238, 154, 0.1);
+    }
+
+    .periods button i {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    #panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .panel-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+    }
+
+    .panel-top .live {
+      color: var(--accent-green);
+    }
+
+    .region-title {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      font-size: 0.82rem;
+      color: var(--accent-cyan);
+      margin-top: -0.8rem;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .chip {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+    }
+
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      background: #06111a;
+    }
+
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.4rem 0.75rem;
+      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      gap: 0.5rem;
+    }
+
+    .tabs button {
+      padding: 0.5rem 0.8rem;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tabs button:hover {
+      color: var(--text-main);
+    }
+
+    .tabs button.active {
+      color: var(--accent-green);
+      border-bottom-color: var(--accent-green);
+    }
+
+    #tabBody {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .fact {
+      background: rgba(7, 18, 28, 0.6);
+      border-left: 3px solid var(--accent-green);
+      padding: 0.75rem 0.9rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .fact b {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--accent-green);
+      margin-bottom: 0.2rem;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 0.5rem;
+    }
+
+    .section-head h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .section-head span {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+
+    .card {
+      position: relative;
+      background: rgba(7, 18, 28, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      border-color: var(--accent-green);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+
+    .card img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-content {
+      padding: 0.6rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-content small {
+      font-size: 0.65rem;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .card-content b {
+      font-size: 0.85rem;
+      color: #fff;
+      margin-top: 0.1rem;
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .region-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .region-list button {
+      padding: 0.3rem 0.55rem;
+      font-size: 0.75rem;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .region-list button:hover {
+      background: var(--bg-card-hover);
+      color: #fff;
+    }
+
+    .region-list button.selected {
+      background: rgba(197, 238, 154, 0.15);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .source {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+
+    .source:hover {
+      text-decoration: underline;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .dialog {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      animation: modalIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .dialog .close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dialog .close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .dialog img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .dialog-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .dialog-body h2 {
+      font-size: 1.4rem;
+      color: #fff;
+    }
+
+    .img-credit {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: rgba(0,0,0,0.3);
+      padding: 0.6rem;
+      border-radius: var(--radius-sm);
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 32, 48, 0.95);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 300;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #toast:empty {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="identity">
+      <div class="brand">TERRA<span> .</span></div>
+      <div class="tagline">시간 위의 문화 지도</div>
+    </div>
+    <div class="search">
+      <input id="search" type="search" aria-label="지역이나 문화 검색" placeholder="⌕  지역, 민족, 문화를 찾아보세요" autocomplete="off">
+      <div class="search-results" id="results" hidden></div>
+    </div>
+    <div class="badge">● EXPLORER / PROTOTYPE</div>
+  </header>
+
+  <div id="runtimeStatus" role="status">
+    상호작용 시작 대기 중입니다. 이 문구가 계속 보이면 파일을 다운로드해 Chrome / Edge에서 직접 열어 주세요. 미리보기에서는 JavaScript가 제한될 수 있습니다.
+  </div>
+
+  <main class="layout">
+    <section class="explorer" aria-label="문화 지구본 탐색">
+      <div class="intro">
+        <div class="eyebrow">ONE PLANET. COUNTLESS STORIES.</div>
+        <h1>세계를 돌며,<br>시간을 건너 만나다.</h1>
+        <p>어느 곳의, 어느 시대가 궁금한가요?<br>지구 위의 작은 점에서 이야기가 시작됩니다.</p>
+      </div>
+
+      <div class="globe-wrap">
+        <svg id="staticGlobe" viewBox="0 0 600 500" role="img" aria-label="스크립트 시작 전 표시되는 간략 지구본">
+          <defs>
+            <radialGradient id="sea" cx="35%" cy="30%">
+              <stop stop-color="#396b82"/>
+              <stop offset="1" stop-color="#081e32"/>
+            </radialGradient>
+            <clipPath id="earthClip">
+              <circle cx="300" cy="250" r="195"/>
+            </clipPath>
+          </defs>
+          <circle cx="300" cy="250" r="203" fill="#477b9433"/>
+          <circle cx="300" cy="250" r="195" fill="url(#sea)" stroke="#7babbc"/>
+          <g clip-path="url(#earthClip)">
+            <g fill="#83a18b" stroke="#a7bd97" stroke-width="1">
+              <path d="M240 130l15-40 45-29 25 12-12 45 38 4 23-23 56 4 65 30 19 55-30 46-39-8-11 35-36-4-27-40-35-17-12-24-33 6-26-10z"/>
+              <path d="M221 184l39-18 47 22 29 51-21 47-17 48-36 36-18-48-21-20-18-53z"/>
+              <path d="M387 301l45-17 45 34-10 37-57 9-26-30z"/>
+              <path d="M150 101l49-22 17 24-21 40-39 18-27-25z"/>
+              <path d="M132 198l37 24 19 49-15 62-22 12-17-55z"/>
+            </g>
+            <g fill="none" stroke="#c0dae42b">
+              <ellipse cx="300" cy="250" rx="110" ry="195"/>
+              <ellipse cx="300" cy="250" rx="45" ry="195"/>
+              <path d="M105 250h390M123 170q177-50 354 0M123 330q177 50 354 0"/>
+            </g>
+          </g>
+          <circle cx="282" cy="154" r="6" fill="#d4ffab"/>
+          <text x="295" y="149" fill="#edffdc" font-size="13">헝가리</text>
+          <circle cx="380" cy="161" r="5" fill="#d4ffab"/>
+          <text x="392" y="155" fill="#edffdc" font-size="13">알타이</text>
+          <text x="300" y="477" fill="#9bafbd" text-anchor="middle" font-size="12">간략 지구본 · 실행되면 드래그 탐색으로 전환됩니다</text>
+        </svg>
+
+        <canvas id="globe" aria-label="드래그로 회전하고 휠로 확대하는 지구본. 지역 선택은 아래 버튼으로도 가능합니다."></canvas>
+
+        <div class="tools">
+          <button id="zoomIn" aria-label="확대">+</button>
+          <button id="zoomOut" aria-label="축소">−</button>
+          <button id="reset" aria-label="시점 초기화">⌂</button>
+          <button id="rotate" aria-label="자동 회전 켜기" title="자동 회전">↻</button>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot"></i>탐색 가능한 문화권</span>
+          <span>드래그 회전 · 스크롤 확대</span>
+        </div>
+
+        <div class="globe-label" id="coordinates">47.2° N / 19.5° E</div>
+      </div>
+
+      <div class="timeline">
+        <div class="timehead">
+          <strong>◷ &nbsp; 시간의 렌즈</strong>
+          <small id="periodLabel">현대 · 21세기</small>
+        </div>
+        <div class="periods" id="periods">
+          <button data-era="0"><i></i>1000년경</button>
+          <button data-era="1"><i></i>1500년경</button>
+          <button class="active" data-era="2"><i></i>21세기</button>
+        </div>
+      </div>
+    </section>
+
+    <aside id="panel" aria-label="선택한 지역 정보">
+      <div class="eyebrow">TERRA / CULTURE ATLAS</div>
+      <h2>세계의 문화를 탐색하세요</h2>
+      <p class="text">헝가리 · 알타이 · 한반도 · 일본 열도 · 중앙 안데스 · 마그레브</p>
+      <p class="text">JavaScript가 실행되면 이곳에 시대별 역사와 문화 카드가 표시됩니다.</p>
+      <a class="source" href="https://en.wikipedia.org/wiki/Hungary" target="_blank" rel="noopener">헝가리 소개 읽기 ↗</a>
+    </aside>
+  </main>
+
+  <div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <article class="dialog" id="dialog"></article>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script>
+    'use strict';
+    function runtimeError(message){
+      const el = document.getElementById('runtimeStatus');
+      if(el){
+        el.classList.add('runtime-error');
+        el.textContent = '실행 오류: ' + message + ' · 최신 Chrome / Edge에서 다운로드한 파일을 열어 주세요.';
+      }
+    }
+    window.addEventListener('error', function(e){
+      runtimeError(e.message || '스크립트를 불러올 수 없습니다.');
+    });
+    window.addEventListener('unhandledrejection', function(e){
+      runtimeError(String(e.reason));
+    });
+
+    const regions = [
+      {id:'hungary',name:'헝가리',en:'HUNGARY',lat:47.2,lon:19.5,group:'마자르인과 다양한 공동체',lang:'헝가리어 · 우랄어족',wiki:'Hungary',landmark:'Hungarian Parliament Building',hero:'도나우강과 헝가리 국회의사당',color:'#b38d6e',intro:'중부 유럽의 도나우강 유역. 헝가리어는 이웃의 슬라브어·게르만어와 달리 우랄어족에 속합니다. 마자르인의 역사뿐 아니라 로마인(롬), 독일계 등 여러 공동체의 이야기가 함께 존재하는 공간입니다.',history:['1000년 무렵 이슈트반 1세의 대관과 함께 기독교 헝가리 왕국이 성립했습니다. 9세기 말 카르파티아 분지에 정착한 마자르 집단의 역사는 오늘날 국경과 일치하지 않습니다.','마차시 1세 사후 야기에우워 왕조 시기의 헝가리 왕국. 1526년 모하치 전투와 이후의 분할 통치는 이 시점보다 뒤의 일입니다.','현대 헝가리는 20세기의 전쟁, 국경 변화와 사회주의 체제를 거쳐 1989년 체제 전환을 경험했고, 2004년 유럽연합에 가입했습니다.'],gene:'현대 헝가리어 화자의 유전적 구성은 주변 중부 유럽 인구와 많은 부분을 공유합니다. 우랄어족 언어 사용이 특정 부계·모계 계통을 뜻하지 않으며, 고대 정복기 표본을 현대 인구 전체와 동일시할 수 없습니다.',items:[['음식','굴라시','Goulash','파프리카를 활용하는 고기 요리. 수프와 스튜 형태가 지역과 조리 전통에 따라 달라집니다.'],['악기','침발롬','Cimbalom','줄을 작은 채로 두드려 연주하는 현악기. 헝가리를 포함한 중·동부 유럽의 여러 음악 전통에서 사용됩니다.'],['의상','마초 자수','Matyó embroidery','메죄쾨베슈 일대와 연결된 꽃무늬 자수 전통. 헝가리 전체에 단일한 전통 의상이 있는 것은 아닙니다.'],['건축','국회의사당','Hungarian Parliament Building','도나우강변의 네오고딕 건축물. 19세기 말 착공해 20세기 초 완성된 근현대 유산입니다.']]},
+      {id:'altai',name:'알타이 산맥',en:'ALTAI MOUNTAINS',lat:49,lon:88,group:'알타이인 · 카자흐인 · 몽골계 공동체 등',lang:'튀르크어족 · 몽골어족 등',wiki:'Altai Mountains',landmark:'Altai Mountains',hero:'국경을 가로지르는 알타이 산악 지대',color:'#819b88',intro:'러시아·몽골·중국·카자흐스탄에 걸친 산악 지대입니다. 알타이인, 카자흐인, 몽골계 공동체 등 서로 다른 언어와 역사를 가진 사람들이 살아갑니다. 지역 이름과 민족 이름은 같은 범주가 아닙니다.',history:['알타이와 인접 초원에는 여러 튀르크계 집단과 정치 세력이 활동했습니다. 오늘날의 민족 명칭과 국경을 1000년경에 그대로 적용해서는 안 됩니다.','몽골 제국 이후 여러 몽골계·튀르크계 집단의 이동과 정치적 재편이 이어졌습니다. 산맥 전체를 하나의 국가나 한 민족의 영역으로 볼 수 없습니다.','오늘날 네 국가에 걸쳐 있으며, 목축·산림 생활·도시 생활이 공존합니다. 행정 구역과 공동체별 문화 경험도 서로 다릅니다.'],gene:'알타이 지역 인구의 계통은 공동체와 표본에 따라 다양합니다. ‘알타이 하플로그룹’이라는 하나의 계통은 없습니다. 지리적 인접성만으로 개인의 혈통이나 문화적 소속을 추정할 수 없습니다.',items:[['음식','베슈바르마크','Beshbarmak','카자흐·키르기스 등 중앙아시아 여러 공동체의 고기와 면 요리. 알타이 전체의 공통 음식이라는 뜻은 아닙니다.'],['악기','돔브라','Dombra','카자흐 음악에서 중요한 긴 목의 현악기. 알타이의 카자흐 공동체와도 연결되는 문화 사례입니다.'],['의상','델','Deel (clothing)','몽골계 공동체의 긴 겉옷. 지역·계절·공동체에 따라 형태가 다릅니다.'],['건축','유르트','Yurt','중앙·내륙 아시아에서 널리 쓰인 이동식 주거. 명칭과 구조는 공동체에 따라 차이가 있습니다.']]},
+      {id:'korea',name:'한반도',en:'KOREAN PENINSULA',lat:36.8,lon:127.8,group:'한민족과 다양한 주민 공동체',lang:'한국어 · 한국어족',wiki:'Korean Peninsula',landmark:'Gyeongbokgung',hero:'서울 경복궁의 건축 풍경',color:'#a97b68',intro:'대륙과 바다가 만나는 동아시아의 반도. 한국어와 문자, 농경과 해양 생활, 주변 지역과의 교류 속에서 다양한 문화가 형성되었습니다. 현대에는 분단과 이주, 도시화의 경험이 공존합니다.',history:['고려 시대. 불교 문화와 대외 교류가 활발했고, 북방 세력과의 관계도 정치와 사회에 큰 영향을 주었습니다.','조선 시대. 유교적 국가 운영이 자리 잡고, 15세기에 창제된 훈민정음이 한문과 함께 다양한 방식으로 사용되었습니다.','대한민국과 조선민주주의인민공화국이 존재하는 분단 상황입니다. 같은 언어적 기반 속에서도 제도와 일상문화는 다양하게 변화했습니다.'],gene:'한국어 화자 집단 내부에도 여러 부계·모계 계통이 존재합니다. 하플로그룹은 한 줄의 계보를 추적하는 도구이며, 개인의 전체 조상 구성이나 한국 문화에 대한 소속을 규정하지 않습니다.',items:[['음식','김치','Kimchi','채소를 소금에 절이고 발효하는 음식군. 재료와 조리법은 지역·계절·가정마다 다양합니다.'],['악기','가야금','Gayageum','줄을 뜯어 연주하는 전통 현악기. 전통 형태뿐 아니라 현대의 개량 악기도 함께 사용됩니다.'],['의상','한복','Hanbok','시대와 신분·용도에 따라 변화한 복식. 오늘날의 대표 이미지가 모든 시대의 모습을 대신하지는 않습니다.'],['건축','한옥','Hanok','목재 구조와 온돌, 마루 등으로 알려진 주거 건축. 지역의 기후와 생활 방식에 따라 형태가 달라집니다.']]},
+      {id:'japan',name:'일본 열도',en:'JAPANESE ARCHIPELAGO',lat:36.5,lon:138,group:'야마토 · 아이누 · 류큐 등',lang:'일본어족 · 아이누어 등',wiki:'Japan',landmark:'Kinkaku-ji',hero:'교토 금각사의 건축 풍경',color:'#aa8387',intro:'길게 이어지는 열도에는 일본어 화자 다수와 더불어 아이누·류큐 등 고유한 역사와 언어를 가진 공동체가 있습니다. 중앙의 문화만으로 열도 전체를 설명할 수는 없습니다.',history:['헤이안 시대. 궁정 문학과 예술이 발달했으며, 열도의 여러 지역은 서로 다른 정치·문화적 상황에 있었습니다.','무로마치 시대 말기, 전국시대로 이어지는 정치적 분열의 시기입니다. 지역 권력과 도시, 교역의 역할이 커졌습니다.','현대 일본은 도시 문화와 지역 전통이 공존하는 사회입니다. 소수 공동체의 언어와 문화 보전도 중요한 주제입니다.'],gene:'일본 열도 집단의 형성은 여러 시기의 이동과 혼합을 포함합니다. 고대 인구 모델이나 하플로그룹 하나를 현대의 민족 경계와 그대로 대응시킬 수 없습니다.',items:[['음식','스시','Sushi','식초로 간한 밥을 중심으로 다양한 재료를 조합하는 음식. 오늘날의 형태는 오랜 변화의 결과입니다.'],['악기','샤미센','Shamisen','세 줄을 가진 현악기. 류큐의 산신과 역사적 연관이 있으며 다양한 공연 장르에 쓰입니다.'],['의상','기모노','Kimono','형태와 착용법이 시대에 따라 달라진 의복. 소재와 무늬는 계절·행사에 따라 달라집니다.'],['건축','금각사','Kinkaku-ji','교토의 사찰로 알려진 건축 유산. 현재의 금각 건물은 20세기 재건입니다.']]},
+      {id:'andes',name:'중앙 안데스',en:'CENTRAL ANDES',lat:-13.5,lon:-71.9,group:'케추아 · 아이마라 등',lang:'케추아어족 · 아이마라어족 등',wiki:'Andes',landmark:'Machu Picchu',hero:'페루 마추픽추의 석조 유산',color:'#91a57a',intro:'고산 지형과 계단식 경작, 다양한 토착 언어가 공존하는 안데스. 잉카의 역사만으로 지역 전체를 설명할 수 없으며, 현대의 토착 공동체 역시 살아 있는 변화의 주체입니다.',history:['와리와 티와나쿠의 영향이 약화되는 전환기 전후입니다. 지역에 따라 다양한 정치·문화적 전통이 이어졌습니다.','잉카 제국이 넓은 안데스 지역을 통합한 시기입니다. 모든 지역 주민이 같은 언어나 정체성을 공유한 것은 아닙니다.','페루·볼리비아 등 여러 국가에 걸쳐 토착 언어와 문화가 이어집니다. 농촌·도시·이주 공동체의 생활은 서로 다양합니다.'],gene:'토착 아메리카 집단의 계통 연구는 공동체별 역사와 식민화 이후 인구 변화를 함께 고려해야 합니다. 현대 언어 사용자나 국적을 하나의 하플로그룹으로 표현할 수 없습니다.',items:[['음식','추뇨','Chuño','안데스의 추위와 건조한 환경을 활용해 보존하는 감자 식품입니다.'],['악기','차랑고','Charango','안데스 지역의 작은 현악기. 식민지 시대 이후 형성된 음악 전통과 관련됩니다.'],['의상','추요','Chullo','귀를 덮는 형태의 안데스 모자. 무늬와 제작 방식은 지역에 따라 다릅니다.'],['건축','마추픽추','Machu Picchu','15세기 잉카 시대의 산악 유적. 정교한 석조 기술과 지형을 활용한 배치로 알려져 있습니다.']]},
+      {id:'maghreb',name:'마그레브',en:'MAGHREB',lat:31.6,lon:-7.9,group:'아마지그 · 아랍 등',lang:'아마지그어파 · 아랍어 등',wiki:'Maghreb',landmark:'Aït Benhaddou',hero:'모로코 아이트벤하두의 흙 건축',color:'#ba8c68',intro:'북아프리카 서부의 지중해·산악·사하라가 이어지는 지역. 아마지그와 아랍의 언어·문화, 아프리카 내륙 및 지중해 교류가 중층적인 역사를 이루었습니다.',history:['여러 이슬람 왕조와 지역 세력이 공존했습니다. 사하라 횡단 교역과 지중해 교류가 정치·경제에 중요한 역할을 했습니다.','마린 왕조 이후의 모로코와 하프스 왕조 등의 세력이 존재했습니다. 지역 전체가 하나의 정치체는 아니었습니다.','모로코·알제리·튀니지 등 각국에서 다양한 언어와 정체성이 공존합니다. 아마지그 언어의 지위와 문화 보전도 중요한 주제입니다.'],gene:'북아프리카에는 오랜 지역적 연속성과 여러 방향의 이동·혼합이 함께 나타납니다. 아랍어 사용이나 아마지그 정체성을 특정 유전 계통 하나로 판정할 수 없습니다.',items:[['음식','쿠스쿠스','Couscous','작은 알갱이 형태의 곡물 식품을 찌고 채소·고기 등과 함께 먹는 전통. 마그레브 여러 나라가 공유합니다.'],['악기','겜브리','Sintir','모로코 그나와 음악에서 중요한 저음 현악기. 사하라 이남 아프리카와 연결된 역사도 담고 있습니다.'],['의상','젤라바','Djellaba','북아프리카에서 착용하는 긴 겉옷. 소재와 장식, 착용 방식에 지역 차이가 있습니다.'],['건축','크사르','Ksar','북아프리카의 요새화된 취락을 가리키는 말. 아이트벤하두는 모로코의 대표적인 흙 건축 사례입니다.']]}
+    ];
+
+    let selected = regions[0], era = 2, tab = 'overview';
+    const panel = document.querySelector('#panel');
+    const eraNames = ['1000년경', '1500년경', '21세기'];
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const wiki = t => 'https://en.wikipedia.org/wiki/' + encodeURIComponent(t.replaceAll(' ', '_'));
+
+    function art(kind, color = '#a8916c') {
+      let shape = '';
+      if (kind === '음식') {
+        shape = '<ellipse cx="200" cy="115" rx="100" ry="48" fill="#e4d7b5"/><ellipse cx="200" cy="106" rx="84" ry="34" fill="#984d33"/><g fill="#d4a55c"><circle cx="170" cy="104" r="15"/><circle cx="214" cy="111" r="18"/><circle cx="239" cy="97" r="12"/></g><path d="M170 65q-18-15 0-32m35 29q-18-15 0-32m35 36q-18-15 0-32" fill="none" stroke="#ffffff55" stroke-width="4"/>';
+      } else if (kind === '악기') {
+        shape = '<g transform="rotate(25 200 100)"><ellipse cx="198" cy="138" rx="43" ry="48" fill="#bc8955"/><rect x="189" y="24" width="18" height="116" rx="5" fill="#dbb980"/><circle cx="198" cy="139" r="14" fill="#2d3436"/><path d="M196 30v135m5-135v135" stroke="#eee0bb" stroke-width="2"/></g>';
+      } else if (kind === '의상') {
+        shape = '<path d="M157 37l43 16 43-16 59 61-38 29-22-25 15 77H143l15-77-22 25-38-29z" fill="' + color + '"/><path d="M157 37l43 52 43-52M200 89v89m-54-41h106" stroke="#e8d5ad" stroke-width="5" fill="none"/><path d="M161 154l13 12 13-12 13 12 13-12 13 12 13-12" fill="none" stroke="#d3b87b" stroke-width="3"/>';
+      } else {
+        shape = '<path d="M0 161l60-48 40 25 50-68 78 84 63-53 109 56v63H0z" fill="#718476" opacity=".6"/><path d="M89 164V95h222v69" fill="' + color + '"/><path d="M75 97l46-34h158l46 34z" fill="#374846"/><path d="M166 164V71h68v93" fill="#cfb997"/><path d="M158 72l42-49 42 49z" fill="#445c55"/><g fill="#3e504c"><path d="M184 164v-37a16 16 0 0132 0v37z"/><path d="M109 119h20v26h-20zm35 0h14v26h-14zm99 0h14v26h-14zm30 0h20v26h-20z"/></g>';
+      }
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="220" viewBox="0 0 400 220"><defs><radialGradient id="g"><stop stop-color="#415450"/><stop offset="1" stop-color="#1c3038"/></radialGradient></defs><rect width="400" height="220" fill="url(#g)"/><circle cx="310" cy="42" r="22" fill="#d9d5b3" opacity=".4"/>' + shape + '<text x="12" y="207" fill="#eef4f5" opacity=".55" font-family="sans-serif" font-size="9">CONCEPT ILLUSTRATION · 문화 사진 아님</text></svg>');
+    }
+
+    const imageCache = new Map();
+    async function photo(img, title) {
+      try {
+        let data = imageCache.get(title);
+        if (!data) {
+          const res = await fetch('https://en.wikipedia.org/w/api.php?origin=*&action=query&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=700&titles=' + encodeURIComponent(title), { signal: AbortSignal.timeout(6000) });
+          if (!res.ok) return;
+          data = await res.json();
+          imageCache.set(title, data);
+        }
+        const page = Object.values(data.query.pages)[0];
+        if (page.thumbnail && img.isConnected) {
+          img.onload = () => {
+            if (img.dataset.caption) {
+              const c = img.parentElement.querySelector('.hero-caption');
+              if (c) c.textContent = img.dataset.caption;
+            }
+            img.dataset.loaded = 'true';
+          };
+          img.src = page.thumbnail.source;
+          img.alt = title + ' — Wikipedia 문서 대표 이미지';
+        }
+      } catch (e) {
+        /* Offline fallback: keep default SVG illustration */
+      }
+    }
+
+    function render() {
+      let r = selected;
+      panel.innerHTML = `
+        <div class="panel-top"><span>REGION FILE / ${String(regions.indexOf(r) + 1).padStart(2, '0')}</span><span class="live">${eraNames[era]} 탐색</span></div>
+        <h2 class="region-title">${r.name}</h2>
+        <div class="subtitle">${r.en} &nbsp; / &nbsp; ${Math.abs(r.lat).toFixed(1)}° ${r.lat >= 0 ? 'N' : 'S'}</div>
+        <div class="chips"><span class="chip">${r.group}</span><span class="chip">${r.lang}</span></div>
+        <div class="hero">
+          <img id="heroImg" src="${art('건축', r.color)}" alt="건축 분위기를 표현한 개념 일러스트" data-caption="${esc(r.hero)} · 현대 참고 이미지">
+          <span class="hero-caption">건축 개념 일러스트 · 실물 재현 아님</span>
+        </div>
+        <nav class="tabs" aria-label="지역 정보 분류">
+          ${[['overview', '개요'], ['history', '역사'], ['genetics', '하플로그룹']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'active' : ''}" aria-pressed="${tab === k}">${n}</button>`).join('')}
+        </nav>
+        <div id="tabBody" class="text"></div>
+        <div class="section-head">
+          <h3>문화를 만나는 네 가지 방법</h3>
+          <span>카드를 눌러 자세히 ↗</span>
+        </div>
+        <div class="cards">
+          ${r.items.map((it, i) => `
+            <button class="card" data-card="${i}">
+              <img src="${art(it[0], r.color)}" alt="${it[0]} 개념 일러스트" data-photo="${esc(it[2])}">
+              <div class="card-content">
+                <small>${['FOOD', 'INSTRUMENT', 'CLOTHING', 'ARCHITECTURE'][i]}</small>
+                <b>${it[1]}</b>
+              </div>
+            </button>
+          `).join('')}
+        </div>
+        <div class="note">
+          문화 카드는 <b>시대별 재현이 아닌 통시적 참고 사례</b>입니다. 과거를 선택해도 현대 사진과 후대 유산이 포함될 수 있습니다. 점은 탐색 기준 위치이며 역사적 국경·분포도가 아닙니다.
+          <div class="region-list">
+            ${regions.map(x => `<button data-region="${x.id}" class="${x.id === r.id ? 'selected' : ''}">${x.name}</button>`).join('')}
+          </div>
+          <p>6개 지역 · 3개 시점의 큐레이션 데모. 지구본의 다른 위치에는 아직 문서가 없습니다.</p>
+          <a class="source" href="${wiki(r.wiki)}" target="_blank" rel="noopener">지역 배경 더 읽기 · Wikipedia ↗</a><br>
+          사진: 연결 시 Wikipedia 문서 대표 이미지. 각 이미지의 원문에서 제작자와 이용허락 조건을 확인하세요. 오프라인·연결 실패 시 자체 개념 일러스트로 표시합니다.
+        </div>
+      `;
+      renderTab();
+      photo(document.querySelector('#heroImg'), r.landmark);
+      panel.querySelectorAll('[data-photo]').forEach(img => photo(img, img.dataset.photo));
+      panel.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; renderTab(); });
+      panel.querySelectorAll('[data-region]').forEach(b => b.onclick = () => selectRegion(b.dataset.region));
+      panel.querySelectorAll('[data-card]').forEach(b => b.onclick = () => openCard(+b.dataset.card, b));
+    }
+
+    function renderTab() {
+      const r = selected;
+      panel.querySelectorAll('[data-tab]').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tab);
+        b.setAttribute('aria-pressed', b.dataset.tab === tab);
+      });
+      document.querySelector('#tabBody').innerHTML = tab === 'overview' ? `
+        <p>${r.intro}</p>
+        <div class="fact"><b>${eraNames[era]}의 이 지역</b><p>${r.history[era]}</p></div>
+        ${r.id === 'altai' ? '<p>※ ‘알타이계’는 지역적 표현과 논쟁적인 언어 계통 가설을 혼동하기 쉽습니다. 튀르크어족·몽골어족·퉁구스어족을 단일 어족으로 묶는 가설은 확립된 분류가 아닙니다.</p>' : ''}
+      ` : tab === 'history' ? `
+        <div class="fact"><b>${eraNames[era]} · 역사적 맥락</b><p>${r.history[era]}</p></div>
+        <p>지역명은 탐색 편의를 위한 현대 지리 표기입니다. 민족의 명칭과 경계는 시대에 따라 변화하며 오늘날의 국경을 과거에 투영해서는 안 됩니다.</p>
+      ` : `
+        <div class="fact"><b>민족 ≠ 언어 ≠ 유전 계통</b><p>${r.gene}</p></div>
+        <p><b>Y-DNA</b>는 부계의 한 줄, <b>mtDNA</b>는 모계의 한 줄을 추적합니다. 둘 다 전체 조상의 극히 일부이며, 상염색체 분석과도 구분됩니다.</p>
+        <p>이 프로토타입에는 집단별 비율 데이터가 없습니다. 논문·표본 수·지역·채집 연도·분류 체계를 검증하지 않은 수치와 시대별 유전 추정은 표시하지 않습니다.</p>
+        <a class="source" href="${wiki('Haplogroup')}" target="_blank" rel="noopener">하플로그룹 개념 읽기 ↗</a>
+      `;
+    }
+
+    let previousFocus;
+    function openCard(i, btn) {
+      previousFocus = btn;
+      let it = selected.items[i], src = btn.querySelector('img').src;
+      document.querySelector('#dialog').innerHTML = `
+        <button class="close" aria-label="닫기">×</button>
+        <img src="${esc(src)}" alt="${esc(it[1])} 참고 이미지 또는 개념 일러스트">
+        <div class="dialog-body">
+          <div class="eyebrow">${selected.en} / ${it[0]}</div>
+          <h2 id="modalTitle">${it[1]}</h2>
+          <p>${it[3]}</p>
+          <p class="img-credit">통시적 문화 사례입니다. 선택한 ${eraNames[era]}의 모습이라는 의미는 아닙니다. 개념 일러스트는 해당 유물을 정확히 재현하지 않습니다. 사진이 표시된 경우 원문 문서에서 이미지를 눌러 저작자·라이선스를 확인하세요.</p>
+          <a class="source" href="${wiki(it[2])}" target="_blank" rel="noopener">문화 설명 · 사진 출처 문서 ↗</a>
+        </div>
+      `;
+      document.querySelector('#modal').hidden = false;
+      document.querySelector('.close').onclick = closeModal;
+      document.querySelector('.close').focus();
+    }
+
+    function closeModal() {
+      document.querySelector('#modal').hidden = true;
+      previousFocus?.focus();
+    }
+
+    document.querySelector('#modal').onclick = e => { if (e.target.id === 'modal') closeModal(); };
+    document.addEventListener('keydown', e => {
+      if (!document.querySelector('#modal').hidden) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Tab') {
+          const f = [...document.querySelector('#dialog').querySelectorAll('button,a')];
+          if (e.shiftKey && document.activeElement === f[0]) {
+            e.preventDefault(); f.at(-1).focus();
+          } else if (!e.shiftKey && document.activeElement === f.at(-1)) {
+            e.preventDefault(); f[0].focus();
+          }
+        }
+      }
+    });
+
+    const canvas = document.querySelector('#globe'), ctx = canvas.getContext('2d'), D = Math.PI / 180;
+    let lon = 36, lat = 23, zoom = 1, auto = false, w = 600, h = 500, radius = 220, cx = 300, cy = 250, dirty = true, texture = null, tw = 0, th = 0, hits = [];
+    const sphere = document.createElement('canvas'), sc = sphere.getContext('2d');
+    let drag = null;
+
+    const land = [
+      [[-168,70],[-135,72],[-120,60],[-95,72],[-60,52],[-80,26],[-99,18],[-112,30],[-126,49],[-155,60]],
+      [[-81,12],[-60,10],[-35,-6],[-42,-23],[-66,-55],[-76,-38]],
+      [[-53,83],[-22,75],[-40,60],[-60,67]],
+      [[-17,35],[10,37],[34,30],[51,12],[41,-14],[20,-35],[10,-20],[-8,5]],
+      [[-10,36],[-10,58],[15,71],[43,68],[72,73],[116,73],[178,64],[163,53],[135,47],[128,30],[109,20],[104,0],[80,7],[68,24],[45,12],[35,30],[25,40],[0,44]],
+      [[112,-11],[136,-12],[154,-25],[146,-39],[115,-34]],
+      [[47,-13],[51,-18],[46,-27],[43,-21]],
+      [[130,32],[142,44],[145,40],[138,34]],
+      [[-180,-75],[-90,-70],[0,-73],[90,-70],[180,-75],[180,-90],[-180,-90]]
+    ];
+
+    function project(la, lo) {
+      let p = la * D, l = (lo - lon) * D, a = lat * D;
+      return {
+        x: Math.cos(p) * Math.sin(l),
+        y: Math.cos(a) * Math.sin(p) - Math.sin(a) * Math.cos(p) * Math.cos(l),
+        z: Math.sin(a) * Math.sin(p) + Math.cos(a) * Math.cos(p) * Math.cos(l)
+      };
+    }
+
+    function resize() {
+      const box = canvas.getBoundingClientRect();
+      w = box.width; h = box.height;
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = w * 0.5; cy = h * 0.52;
+      radius = Math.min(w * 0.39, h * 0.45) * zoom;
+      dirty = true;
+    }
+    window.addEventListener('resize', resize);
+
+    const texImage = new Image();
+    texImage.crossOrigin = 'anonymous';
+    texImage.onload = () => {
+      try {
+        const t = document.createElement('canvas');
+        tw = 1024; th = 512;
+        t.width = tw; t.height = th;
+        const c = t.getContext('2d');
+        c.drawImage(texImage, 0, 0, tw, th);
+        texture = c.getImageData(0, 0, tw, th).data;
+        dirty = true;
+      } catch (e) {}
+    };
+    texImage.src = 'https://unpkg.com/three-globe@2.41.12/example/img/earth-blue-marble.jpg';
+
+    function drawTexture() {
+      const n = Math.min(460, Math.max(220, Math.round(radius * 1.7)));
+      if (sphere.width !== n) { sphere.width = n; sphere.height = n; }
+      const im = sc.createImageData(n, n), out = im.data, a = lat * D, b = lon * D, sa = Math.sin(a), ca = Math.cos(a), sb = Math.sin(b), cb = Math.cos(b);
+      for (let y = 0; y < n; y++) {
+        const yy = 1 - 2 * y / (n - 1);
+        for (let x = 0; x < n; x++) {
+          const xx = 2 * x / (n - 1) - 1, rr = xx * xx + yy * yy;
+          if (rr > 1) continue;
+          const z = Math.sqrt(1 - rr), Y = yy * ca + z * sa, Z = z * ca - yy * sa, X = xx * cb + Z * sb, ZZ = Z * cb - xx * sb;
+          const la = Math.asin(Math.max(-1, Math.min(1, Y))), lo = Math.atan2(X, ZZ), u = ((Math.floor((lo / (2 * Math.PI) + 0.5) * tw) % tw) + tw) % tw, v = Math.min(th - 1, Math.max(0, Math.floor((0.5 - la / Math.PI) * th))), j = (v * tw + u) * 4, k = (y * n + x) * 4, light = 0.36 + 0.64 * Math.max(0, -xx * 0.28 + yy * 0.25 + z * 0.89);
+          out[k] = texture[j] * light;
+          out[k + 1] = texture[j + 1] * light;
+          out[k + 2] = texture[j + 2] * light;
+          out[k + 3] = 255;
+        }
+      }
+      sc.putImageData(im, 0, 0);
+      ctx.drawImage(sphere, cx - radius, cy - radius, radius * 2, radius * 2);
+    }
+
+    function line(points, color, width) {
+      ctx.beginPath();
+      let drawing = false;
+      for (const [la, lo] of points) {
+        const p = project(la, lo);
+        if (p.z < 0) { drawing = false; continue; }
+        let x = cx + p.x * radius, y = cy - p.y * radius;
+        if (!drawing) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+        drawing = true;
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      for (let i = 0; i < 65; i++) {
+        let x = ((i * 137.508) % 997) / 997 * w, y = ((i * 213.73) % 991) / 991 * h;
+        ctx.fillStyle = i % 4 ? '#637d902b' : '#a2c3d84a';
+        ctx.fillRect(x, y, i % 4 ? 1 : 1.5, 1);
+      }
+      const glow = ctx.createRadialGradient(cx, cy, radius * 0.96, cx, cy, radius * 1.16);
+      glow.addColorStop(0, '#8bb8cf50');
+      glow.addColorStop(0.3, '#3d6d8020');
+      glow.addColorStop(1, '#18334000');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 1.16, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.clip();
+
+      const ocean = ctx.createRadialGradient(cx - radius * 0.4, cy - radius * 0.4, 0, cx, cy, radius);
+      ocean.addColorStop(0, '#22495c');
+      ocean.addColorStop(1, '#091c2a');
+      ctx.fillStyle = ocean;
+      ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+
+      if (texture) drawTexture();
+      else {
+        for (const poly of land) {
+          ctx.beginPath();
+          let visible = 0;
+          poly.forEach(([lo, la], i) => {
+            let p = project(la, lo);
+            if (p.z > 0) visible++;
+            let z = p.z < 0 ? Math.hypot(p.x, p.y) : 1;
+            const x = cx + p.x / z * radius, y = cy - p.y / z * radius;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          if (visible > poly.length * 0.45) {
+            ctx.closePath();
+            ctx.fillStyle = '#627f71';
+            ctx.fill();
+            ctx.strokeStyle = '#8aa38b55';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (let la = -60; la <= 60; la += 30) line(Array.from({ length: 181 }, (_, i) => [la, -180 + i * 2]), '#c9dfd519', 0.6);
+      for (let lo = -180; lo < 180; lo += 30) line(Array.from({ length: 91 }, (_, i) => [-90 + i * 2, lo]), '#c9dfd519', 0.6);
+
+      const shadow = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.25, radius * 0.1, cx + radius * 0.25, cy + radius * 0.15, radius * 1.05);
+      shadow.addColorStop(0, '#020c1600');
+      shadow.addColorStop(0.7, '#020c160a');
+      shadow.addColorStop(1, '#020c1699');
+      ctx.fillStyle = shadow;
+      ctx.fillRect(cx - radius, cy - radius, 2 * radius, 2 * radius);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#a1c7d94d';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      hits = [];
+      for (const reg of regions) {
+        let p = project(reg.lat, reg.lon);
+        if (p.z < 0.06) continue;
+        let x = cx + p.x * radius, y = cy - p.y * radius, is = reg === selected;
+        hits.push({ x, y, reg });
+
+        ctx.beginPath();
+        ctx.arc(x, y, is ? 11 : 7, 0, 7);
+        ctx.fillStyle = is ? '#c5ee9a33' : '#07182199';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(x, y, is ? 5 : 3.2, 0, 7);
+        ctx.fillStyle = is ? '#d1ffa8' : '#e6ebd5';
+        ctx.fill();
+
+        if (is) {
+          ctx.beginPath();
+          ctx.arc(x, y, 11, 0, 7);
+          ctx.strokeStyle = '#c5ee9a88';
+          ctx.stroke();
+        }
+
+        const label = reg.name;
+        ctx.font = (is ? '600 ' : '400 ') + '11px system-ui';
+        let offset = reg.id === 'japan' ? 16 : -14;
+        ctx.textAlign = 'center';
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#081620cc';
+        ctx.strokeText(label, x, y + offset);
+        ctx.fillStyle = is ? '#e0ffc4' : '#e0e9e7';
+        ctx.fillText(label, x, y + offset);
+      }
+      document.querySelector('#coordinates').textContent = `${Math.abs(lat).toFixed(1)}° ${lat >= 0 ? 'N' : 'S'} / ${Math.abs(lon).toFixed(1)}° ${lon >= 0 ? 'E' : 'W'}  ·  ${texture ? 'EARTH IMAGERY' : 'SIMPLIFIED GLOBE'}`;
+    }
+
+    let last = 0;
+    function frame(t) {
+      if (auto && !drag) {
+        lon = (lon + 0.07 + 540) % 360 - 180;
+        dirty = true;
+      }
+      if (dirty && t - last > 40) {
+        draw();
+        dirty = false;
+        last = t;
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function selectRegion(id) {
+      selected = regions.find(r => r.id === id);
+      lon = selected.lon;
+      lat = Math.max(-55, Math.min(55, selected.lat - 8));
+      auto = false;
+      document.querySelector('#rotate').setAttribute('aria-label', '자동 회전 켜기');
+      dirty = true;
+      render();
+      document.querySelector('#results').hidden = true;
+      document.querySelector('#search').value = '';
+    }
+
+    canvas.addEventListener('pointerdown', e => {
+      drag = { x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false };
+      canvas.setPointerCapture(e.pointerId);
+      auto = false;
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) > 5) drag.moved = true;
+      lon = (lon - dx * 0.32 + 540) % 360 - 180;
+      lat = Math.max(-80, Math.min(80, lat + dy * 0.28));
+      drag.x = e.clientX; drag.y = e.clientY;
+      dirty = true;
+    });
+
+    canvas.addEventListener('pointerup', e => {
+      if (drag && !drag.moved) {
+        let rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+        let hit = hits.filter(p => Math.hypot(x - p.x, y - p.y) < 25).sort((a, b) => Math.hypot(x - a.x, y - a.y) - Math.hypot(x - b.x, y - b.y))[0];
+        if (hit) selectRegion(hit.reg.id);
+        else toast('밝은 지역 점을 선택하거나 검색창에서 지역을 찾아보세요.');
+      }
+      drag = null;
+    });
+
+    canvas.addEventListener('pointercancel', () => drag = null);
+
+    function zoomBy(n) {
+      zoom = Math.max(0.7, Math.min(1.8, zoom * n));
+      resize();
+    }
+
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      zoomBy(e.deltaY > 0 ? 0.92 : 1.08);
+    }, { passive: false });
+
+    document.querySelector('#zoomIn').onclick = () => zoomBy(1.15);
+    document.querySelector('#zoomOut').onclick = () => zoomBy(1 / 1.15);
+    document.querySelector('#reset').onclick = () => { zoom = 1; lon = 36; lat = 23; auto = false; resize(); };
+    document.querySelector('#rotate').onclick = () => {
+      auto = !auto;
+      document.querySelector('#rotate').setAttribute('aria-label', auto ? '자동 회전 끄기' : '자동 회전 켜기');
+      toast(auto ? '자동 회전 켜짐' : '자동 회전 꺼짐');
+    };
+
+    document.querySelectorAll('[data-era]').forEach(b => b.onclick = () => {
+      era = +b.dataset.era;
+      document.querySelectorAll('[data-era]').forEach(x => {
+        x.classList.toggle('active', x === b);
+        x.setAttribute('aria-pressed', x === b);
+      });
+      document.querySelector('#periodLabel').textContent = ['중세 전기 · 1000년경', '지역별 전환기 · 1500년경', '현대 · 21세기'][era];
+      render();
+    });
+
+    const search = document.querySelector('#search'), results = document.querySelector('#results');
+    search.addEventListener('input', () => {
+      let q = search.value.trim().toLowerCase();
+      if (!q) { results.hidden = true; return; }
+      let matches = regions.filter(r => (r.name + r.en + r.group + r.lang + r.items.flat().join(' ')).toLowerCase().includes(q));
+      results.innerHTML = matches.length ? matches.map(r => `<button data-hit="${r.id}">${r.name} <small>↗ ${r.en}</small></button>`).join('') : '<div style="padding:16px;color:#9bafbd;font-size:12px">등록된 6개 지역에서 검색 결과가 없습니다.</div>';
+      results.hidden = false;
+      results.querySelectorAll('button').forEach(b => b.onclick = () => selectRegion(b.dataset.hit));
+    });
+
+    search.addEventListener('keydown', e => {
+      if (e.key === 'Enter') results.querySelector('button')?.click();
+      if (e.key === 'Escape') results.hidden = true;
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search')) results.hidden = true;
+    });
+
+    let toastTimer;
+    function toast(s) {
+      document.querySelector('#toast').textContent = s;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => document.querySelector('#toast').textContent = '', 3200);
+    }
+
+    resize();
+    draw();
+    document.getElementById('staticGlobe').style.display = 'none';
+    render();
+    requestAnimationFrame(frame);
+
+    document.getElementById('runtimeStatus').textContent = '● 실행 중 · 지구본을 드래그해 회전하고, 밝은 점을 눌러 지역을 선택하세요. 휠 또는 + / − 버튼으로 확대할 수 있습니다.';
+
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(() => resize()).observe(document.querySelector('.globe-wrap'));
+    }
+  </script>
+</body>
+</html>
